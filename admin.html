@@ -198,27 +198,59 @@
         </div>
     </div>
 
-    <!-- Modal: Add Exercise -->
+    <!-- Modal: Add Exercise (المُحدَّث لدعم الكسور والأسس والجذور والنصوص في السؤال والخيارات) -->
     <div id="exercise-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto" dir="rtl">
-        <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-3xl p-6 shadow-2xl space-y-4 my-8">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-3xl rounded-3xl p-6 shadow-2xl space-y-4 my-8">
             <div class="flex justify-between items-center border-b pb-3 border-slate-100 dark:border-slate-700">
                 <h3 class="text-lg font-bold text-emerald-600">إضافة تمرين تفاعلي للدرس</h3>
-                <button type="button" onclick="previewExerciseContent()" class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg font-semibold hover:bg-emerald-100 transition"><i class="fa-solid fa-eye ml-1"></i> معاينة التمرين</button>
+                <button type="button" onclick="previewExerciseContent()" class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg font-semibold hover:bg-emerald-100 transition"><i class="fa-solid fa-eye ml-1"></i> تحديث المعاينة</button>
             </div>
             <input type="hidden" id="ex-grade-id">
             <input type="hidden" id="ex-book-id">
             <input type="hidden" id="ex-unit-id">
             <input type="hidden" id="ex-lesson-id">
+
+            <!-- شريط أدوات الرموز الرياضية السريع -->
+            <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl border border-slate-200 dark:border-slate-600 space-y-2">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <span class="text-xs font-bold text-slate-600 dark:text-slate-300"><i class="fa-solid fa-square-root-variable ml-1 text-emerald-600"></i> أزرار الإدراج الرياضي السريع (تُدرج في آخر حقل ضغطت عليه):</span>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button type="button" onmousedown="event.preventDefault()" onclick="insertExMath('\\frac{بسط}{مقام}')" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:border-emerald-500 transition">كسر $\frac{a}{b}$</button>
+                        <button type="button" onmousedown="event.preventDefault()" onclick="insertExMath('\\sqrt{...}')" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:border-emerald-500 transition">جذر $\sqrt{x}$</button>
+                        <button type="button" onmousedown="event.preventDefault()" onclick="insertExMath('\\sqrt[3]{...}')" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:border-emerald-500 transition">جذر نوني $\sqrt[n]{x}$</button>
+                        <button type="button" onmousedown="event.preventDefault()" onclick="insertExMath('{x}^{2}')" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:border-emerald-500 transition">أس $x^n$</button>
+                        <button type="button" onmousedown="event.preventDefault()" onclick="insertExMath('\\left( ... \\right)')" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:border-emerald-500 transition">أقواس $(...)$</button>
+                        <button type="button" onmousedown="event.preventDefault()" onclick="insertExMath('\\times')" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:border-emerald-500 transition">$\times$</button>
+                        <button type="button" onmousedown="event.preventDefault()" onclick="insertExMath('\\div')" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:border-emerald-500 transition">$\div$</button>
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-500">اكتب النص العربي بشكل طبيعي، وضع المعادلة أو الكسر أو الجذر أو الأس بين علامتي دولار مثل: <code>احسب قيمة $\frac{\sqrt{16}}{2^2}$</code> أو الصق صورة مباشرة بـ <code>Ctrl+V</code>.</p>
+            </div>
+
             <div>
-                <label class="block text-sm font-medium mb-1">نص السؤال</label>
-                <textarea id="ex-question" rows="3" placeholder="اكتب نص السؤال أو الصق رسمة/معادلة (Ctrl + V)..." class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onpaste="handleDirectPaste(event, 'ex-question')"></textarea>
+                <label class="block text-sm font-medium mb-1">نص السؤال (يدعم النص + الكسور + الأسس + الجذور + لصق الصور)</label>
+                <textarea id="ex-question" rows="3" onfocus="activeExField='ex-question'" oninput="previewExerciseContent()" placeholder="مثال: أوجد ناتج المقدار $\frac{\sqrt{25} + 3^2}{7}$ :" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onpaste="handleDirectPaste(event, 'ex-question')"></textarea>
             </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <textarea id="ex-opt0" rows="2" placeholder="الخيار الأول" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onpaste="handleDirectPaste(event, 'ex-opt0')"></textarea>
-                <textarea id="ex-opt1" rows="2" placeholder="الخيار الثاني" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onpaste="handleDirectPaste(event, 'ex-opt1')"></textarea>
-                <textarea id="ex-opt2" rows="2" placeholder="الخيار الثالث" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onpaste="handleDirectPaste(event, 'ex-opt2')"></textarea>
-                <textarea id="ex-opt3" rows="2" placeholder="الخيار الرابع" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onpaste="handleDirectPaste(event, 'ex-opt3')"></textarea>
+                <div class="space-y-1">
+                    <label class="block text-xs font-semibold text-slate-500">الخيار الأول</label>
+                    <textarea id="ex-opt0" rows="2" onfocus="activeExField='ex-opt0'" oninput="previewExerciseContent()" placeholder="مثال: $\frac{14}{7} = 2$" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onpaste="handleDirectPaste(event, 'ex-opt0')"></textarea>
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-semibold text-slate-500">الخيار الثاني</label>
+                    <textarea id="ex-opt1" rows="2" onfocus="activeExField='ex-opt1'" oninput="previewExerciseContent()" placeholder="مثال: $\sqrt{4}$" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onpaste="handleDirectPaste(event, 'ex-opt1')"></textarea>
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-semibold text-slate-500">الخيار الثالث</label>
+                    <textarea id="ex-opt2" rows="2" onfocus="activeExField='ex-opt2'" oninput="previewExerciseContent()" placeholder="مثال: $3^2$" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onpaste="handleDirectPaste(event, 'ex-opt2')"></textarea>
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-semibold text-slate-500">الخيار الرابع</label>
+                    <textarea id="ex-opt3" rows="2" onfocus="activeExField='ex-opt3'" oninput="previewExerciseContent()" placeholder="مثال: $\frac{1}{2}$" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onpaste="handleDirectPaste(event, 'ex-opt3')"></textarea>
+                </div>
             </div>
+
             <div>
                 <label class="block text-sm font-medium mb-1">الإجابة الصحيحة</label>
                 <select id="ex-correct" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm">
@@ -228,10 +260,12 @@
                     <option value="3">الخيار الرابع</option>
                 </select>
             </div>
+
             <div class="p-3 bg-emerald-50/50 dark:bg-slate-700/30 rounded-2xl border border-emerald-100 dark:border-slate-700 space-y-2">
-                <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400">معاينة السؤال والخيارات:</span>
-                <div id="live-exercise-preview" class="p-3 bg-white dark:bg-slate-800 rounded-xl min-h-[50px] text-sm space-y-2" dir="rtl" style="text-align: right; direction: rtl;">اضغط "معاينة التمرين" لرؤية المعادلات والرسوم...</div>
+                <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400">معاينة السؤال والخيارات (كما ستظهر للطالب):</span>
+                <div id="live-exercise-preview" class="p-3 bg-white dark:bg-slate-800 rounded-xl min-h-[50px] text-sm space-y-2" dir="rtl" style="text-align: right; direction: rtl;">اكتب السؤال أو الخيارات لرؤية المعاينة الفورية...</div>
             </div>
+
             <div class="flex justify-end gap-3 pt-2">
                 <button onclick="closeExerciseModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-sm">إلغاء</button>
                 <button onclick="saveLessonExercise()" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-medium">حفظ التمرين</button>
@@ -525,13 +559,39 @@
             }
         }
 
+        let activeExField = 'ex-question';
+
+        function insertExMath(latexSnippet) {
+            const field = document.getElementById(activeExField) || document.getElementById('ex-question');
+            if (!field) return;
+            const start = field.selectionStart;
+            const end = field.selectionEnd;
+            const val = field.value;
+
+            // التحقق هل المؤشر داخل علامتي دولار $...$ أم خارجهما
+            const before = val.substring(0, start);
+            const dollarCount = (before.match(/\$/g) || []).length;
+            const isInsideMath = (dollarCount % 2 === 1);
+
+            const toInsert = isInsideMath ? ` ${latexSnippet} ` : ` $${latexSnippet}$ `;
+            field.value = before + toInsert + val.substring(end);
+            field.focus();
+            const newCursorPos = start + toInsert.length;
+            field.setSelectionRange(newCursorPos, newCursorPos);
+            previewExerciseContent();
+        }
+
         function openExerciseModal(gradeId, bookId, unitId, lessonId) {
             document.getElementById('ex-grade-id').value = gradeId;
             document.getElementById('ex-book-id').value = bookId;
             document.getElementById('ex-unit-id').value = unitId;
             document.getElementById('ex-lesson-id').value = lessonId;
-            document.getElementById('live-exercise-preview').innerHTML = 'اضغط "معاينة التمرين" لرؤية المعادلات والرسوم...';
+            activeExField = 'ex-question';
+            document.getElementById('live-exercise-preview').innerHTML = 'اكتب السؤال أو الخيارات لرؤية المعاينة الفورية...';
             document.getElementById('exercise-modal').classList.remove('hidden');
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([document.getElementById('exercise-modal')]);
+            }
         }
         function closeExerciseModal() { document.getElementById('exercise-modal').classList.add('hidden'); }
 
@@ -544,11 +604,11 @@
                 document.getElementById('ex-opt3').value
             ].filter(o => o.trim() !== '');
 
-            let html = `<div dir="rtl" style="text-align: right; direction: rtl;"><strong>السؤال:</strong> ${q}</div>`;
+            let html = `<div dir="rtl" style="text-align: right; direction: rtl; line-height: 1.8;"><strong>السؤال:</strong> ${q.replace(/\n/g, '<br>')}</div>`;
             if (opts.length > 0) {
-                html += `<ul class="list-disc pr-5 space-y-1">`;
+                html += `<ul class="list-disc pr-5 space-y-2 mt-2">`;
                 opts.forEach(o => {
-                    html += `<li dir="rtl" style="text-align: right; direction: rtl;">${o}</li>`;
+                    html += `<li dir="rtl" style="text-align: right; direction: rtl; line-height: 1.8;">${o.replace(/\n/g, '<br>')}</li>`;
                 });
                 html += `</ul>`;
             }
@@ -564,11 +624,11 @@
             const uId = document.getElementById('ex-unit-id').value;
             const lId = document.getElementById('ex-lesson-id').value;
 
-            const question = document.getElementById('ex-question').value.trim();
-            const opt0 = document.getElementById('ex-opt0').value.trim();
-            const opt1 = document.getElementById('ex-opt1').value.trim();
-            const opt2 = document.getElementById('ex-opt2').value.trim();
-            const opt3 = document.getElementById('ex-opt3').value.trim();
+            const question = document.getElementById('ex-question').value.trim().replace(/\n/g, '<br>');
+            const opt0 = document.getElementById('ex-opt0').value.trim().replace(/\n/g, '<br>');
+            const opt1 = document.getElementById('ex-opt1').value.trim().replace(/\n/g, '<br>');
+            const opt2 = document.getElementById('ex-opt2').value.trim().replace(/\n/g, '<br>');
+            const opt3 = document.getElementById('ex-opt3').value.trim().replace(/\n/g, '<br>');
             const correct = parseInt(document.getElementById('ex-correct').value);
 
             if (!question || !opt0 || !opt1) {

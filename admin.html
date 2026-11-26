@@ -41,6 +41,13 @@
             direction: rtl !important;
             text-align: right !important;
         }
+        #live-exercise-preview img, #live-math-preview img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 8px 0;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col" dir="rtl">
@@ -118,41 +125,6 @@
 
             <!-- Content Management Panel -->
             <div class="lg:col-span-3 space-y-6">
-
-                <!-- قسم إدارة الطلاب -->
-                <div id="admin-students-section" class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-6">
-                    <div class="flex flex-wrap justify-between items-center gap-3 border-b pb-4 border-slate-100 dark:border-slate-700">
-                        <div>
-                            <h2 class="text-xl font-bold text-indigo-600"><i class="fa-solid fa-users-gear ml-2"></i> إدارة الطلاب</h2>
-                            <p class="text-xs text-slate-500 mt-1">اعتماد حسابات الطلاب، تحديد الصف المسموح له بالدخول، أو الرفض والحذف.</p>
-                        </div>
-                        <button onclick="loadStudentsManagement()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3.5 py-2 rounded-xl text-xs font-bold transition">
-                            <i class="fa-solid fa-rotate-right ml-1"></i> تحديث القائمة
-                        </button>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700">
-                                    <th class="p-3 font-bold">الاسم</th>
-                                    <th class="p-3 font-bold">البريد الإلكتروني</th>
-                                    <th class="p-3 font-bold">الصف المطلوب</th>
-                                    <th class="p-3 font-bold">تاريخ التسجيل</th>
-                                    <th class="p-3 font-bold">الحالة</th>
-                                    <th class="p-3 font-bold">الصف المسموح (allowedGrade)</th>
-                                    <th class="p-3 font-bold">الإجراءات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-students-tbody" class="divide-y divide-slate-100 dark:divide-slate-700">
-                                <tr>
-                                    <td colspan="7" class="p-6 text-center text-slate-400">جاري تحميل بيانات الطلاب...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
                 <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-6">
                     <h2 class="text-xl font-bold text-indigo-600">إدارة الوحدات والدروس والتمارين</h2>
                     <div id="admin-units-container" class="space-y-6"></div>
@@ -238,21 +210,46 @@
         <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-3xl p-6 shadow-2xl space-y-4 my-8">
             <div class="flex justify-between items-center border-b pb-3 border-slate-100 dark:border-slate-700">
                 <h3 class="text-lg font-bold text-emerald-600">إضافة تمرين تفاعلي للدرس</h3>
-                <button type="button" onclick="previewExerciseContent()" class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg font-semibold hover:bg-emerald-100 transition"><i class="fa-solid fa-eye ml-1"></i> معاينة التمرين</button>
+                <button type="button" onclick="previewExerciseContent()" class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg font-semibold hover:bg-emerald-100 transition"><i class="fa-solid fa-eye ml-1"></i> تحديث المعاينة</button>
             </div>
+
+            <!-- شريط الإدراج الرياضي السريع -->
+            <div class="bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-600 space-y-1.5">
+                <div class="text-[11px] font-bold text-slate-500 dark:text-slate-300">اضغط داخل حقل السؤال أو الخيار ثم اختر الرمز لإدراجه فوراً:</div>
+                <div class="flex flex-wrap gap-1.5" dir="ltr">
+                    <button type="button" onclick="insertMathSnippet('$\\frac{}{}$', 7)" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:bg-indigo-50 transition" title="كسر">كسر $\frac{a}{b}$</button>
+                    <button type="button" onclick="insertMathSnippet('$\\sqrt{}$', 7)" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:bg-indigo-50 transition" title="جذر تربيعي">جذر $\sqrt{x}$</button>
+                    <button type="button" onclick="insertMathSnippet('$\\sqrt[]{}$', 7)" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:bg-indigo-50 transition" title="جذر نوني">جذر نوني $\sqrt[n]{x}$</button>
+                    <button type="button" onclick="insertMathSnippet('$^{}$', 3)" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:bg-indigo-50 transition" title="أس / قوة">أس $x^n$</button>
+                    <button type="button" onclick="insertMathSnippet('$_{}$', 3)" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:bg-indigo-50 transition" title="دليل سفلي">دليل $x_n$</button>
+                    <button type="button" onclick="insertMathSnippet('$\\left(  \\right)$', 8)" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:bg-indigo-50 transition" title="أقواس كبيرة">أقواس $( )$</button>
+                    <button type="button" onclick="insertMathSnippet('$\\times$', 7)" class="px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:bg-indigo-50 transition">$\times$</button>
+                    <button type="button" onclick="insertMathSnippet('$\\div$', 5)" class="px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:bg-indigo-50 transition">$\div$</button>
+                    <button type="button" onclick="insertMathSnippet('$\\pm$', 4)" class="px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:bg-indigo-50 transition">$\pm$</button>
+                    <button type="button" onclick="insertMathSnippet('$\\pi$', 4)" class="px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:bg-indigo-50 transition">$\pi$</button>
+                    <button type="button" onclick="insertMathSnippet('$\\le$', 4)" class="px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:bg-indigo-50 transition">$\le$</button>
+                    <button type="button" onclick="insertMathSnippet('$\\ge$', 4)" class="px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:bg-indigo-50 transition">$\ge$</button>
+                    <button type="button" onclick="insertMathSnippet('$\\neq$', 5)" class="px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold hover:bg-indigo-50 transition">$\neq$</button>
+                    <label class="px-2.5 py-1 bg-indigo-600 text-white rounded-lg text-xs font-bold cursor-pointer hover:bg-indigo-700 transition">
+                        <i class="fa-solid fa-image ml-1"></i> إدراج صورة
+                        <input type="file" accept="image/*" onchange="handleExerciseImageUpload(event)" class="hidden">
+                    </label>
+                </div>
+            </div>
+
             <input type="hidden" id="ex-grade-id">
             <input type="hidden" id="ex-book-id">
             <input type="hidden" id="ex-unit-id">
             <input type="hidden" id="ex-lesson-id">
             <div>
-                <label class="block text-sm font-medium mb-1">نص السؤال</label>
-                <textarea id="ex-question" rows="3" placeholder="اكتب نص السؤال أو الصق رسمة/معادلة (Ctrl + V)..." class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onpaste="handleDirectPaste(event, 'ex-question')"></textarea>
+                <label class="block text-sm font-medium mb-1">نص السؤال (يمكنك لصق صورة مباشرة هنا بـ Ctrl + V)</label>
+                <textarea id="ex-question" rows="3" placeholder="اكتب نص السؤال أو الصق رسمة/معادلة (Ctrl + V)..." class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onfocus="activeExField = this" oninput="scheduleExercisePreview()" onpaste="handleDirectPaste(event, 'ex-question')"></textarea>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <textarea id="ex-opt0" rows="2" placeholder="الخيار الأول" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onpaste="handleDirectPaste(event, 'ex-opt0')"></textarea>
-                <textarea id="ex-opt1" rows="2" placeholder="الخيار الثاني" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onpaste="handleDirectPaste(event, 'ex-opt1')"></textarea>
-                <textarea id="ex-opt2" rows="2" placeholder="الخيار الثالث" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onpaste="handleDirectPaste(event, 'ex-opt2')"></textarea>
-                <textarea id="ex-opt3" rows="2" placeholder="الخيار الرابع" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onpaste="handleDirectPaste(event, 'ex-opt3')"></textarea>
+                <textarea id="ex-opt0" rows="2" placeholder="الخيار الأول (نص، معادلة، أو صورة Ctrl+V)" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onfocus="activeExField = this" oninput="scheduleExercisePreview()" onpaste="handleDirectPaste(event, 'ex-opt0')"></textarea>
+                <textarea id="ex-opt1" rows="2" placeholder="الخيار الثاني (نص، معادلة، أو صورة Ctrl+V)" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onfocus="activeExField = this" oninput="scheduleExercisePreview()" onpaste="handleDirectPaste(event, 'ex-opt1')"></textarea>
+                <textarea id="ex-opt2" rows="2" placeholder="الخيار الثالث (نص، معادلة، أو صورة Ctrl+V)" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onfocus="activeExField = this" oninput="scheduleExercisePreview()" onpaste="handleDirectPaste(event, 'ex-opt2')"></textarea>
+                <textarea id="ex-opt3" rows="2" placeholder="الخيار الرابع (نص، معادلة، أو صورة Ctrl+V)" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm outline-none font-mono" dir="rtl" onfocus="activeExField = this" oninput="scheduleExercisePreview()" onpaste="handleDirectPaste(event, 'ex-opt3')"></textarea>
             </div>
             <div>
                 <label class="block text-sm font-medium mb-1">الإجابة الصحيحة</label>
@@ -264,8 +261,8 @@
                 </select>
             </div>
             <div class="p-3 bg-emerald-50/50 dark:bg-slate-700/30 rounded-2xl border border-emerald-100 dark:border-slate-700 space-y-2">
-                <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400">معاينة السؤال والخيارات:</span>
-                <div id="live-exercise-preview" class="p-3 bg-white dark:bg-slate-800 rounded-xl min-h-[50px] text-sm space-y-2" dir="rtl" style="text-align: right; direction: rtl;">اضغط "معاينة التمرين" لرؤية المعادلات والرسوم...</div>
+                <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400">معاينة حية للسؤال والخيارات:</span>
+                <div id="live-exercise-preview" class="p-3 bg-white dark:bg-slate-800 rounded-xl min-h-[50px] text-sm space-y-2" dir="rtl" style="text-align: right; direction: rtl;">اكتب السؤال أو الصق صورة لتظهر هنا تلقائياً...</div>
             </div>
             <div class="flex justify-end gap-3 pt-2">
                 <button onclick="closeExerciseModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-sm">إلغاء</button>
@@ -290,6 +287,8 @@
         const db = firebase.firestore();
 
         const AUTHORIZED_ADMIN_EMAIL = "tahaammouri131@gmail.com";
+        let activeExField = null;
+        let previewTimer = null;
 
         auth.onAuthStateChanged(async user => {
             const guardScreen = document.getElementById('admin-guard-screen');
@@ -317,7 +316,6 @@
             guardScreen.classList.add('hidden');
             panelWrapper.classList.remove('hidden');
             await loadGradesDropdown();
-            await loadStudentsManagement();
         });
 
         async function handleGuardLogin(e) {
@@ -339,121 +337,6 @@
         async function signOutAdmin() {
             await auth.signOut();
             window.location.replace('index.html');
-        }
-
-        // --- إدارة الطلاب ---
-        function formatStudentDate(createdAt) {
-            try {
-                if (!createdAt) return 'غير محدد';
-                const d = typeof createdAt.toDate === 'function' ? createdAt.toDate() : new Date(createdAt);
-                if (isNaN(d.getTime())) return 'غير محدد';
-                return d.toLocaleDateString('ar-SY');
-            } catch (e) {
-                return 'غير محدد';
-            }
-        }
-
-        function getStudentStatusBadge(student) {
-            if (student.approved === true || student.status === 'مقبول') {
-                return `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">مقبول</span>`;
-            }
-            if (student.status === 'مرفوض') {
-                return `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700">مرفوض</span>`;
-            }
-            return `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">قيد الانتظار</span>`;
-        }
-
-        async function loadStudentsManagement() {
-            const tbody = document.getElementById('admin-students-tbody');
-            if (!tbody) return;
-            tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">جاري تحميل الطلاب...</td></tr>`;
-
-            try {
-                const snap = await db.collection('users').where('role', '==', 'student').get();
-                if (snap.empty) {
-                    tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">لا توجد طلبات تسجيل للطلاب حالياً.</td></tr>`;
-                    return;
-                }
-
-                const students = [];
-                snap.forEach(doc => students.push({ id: doc.id, ...doc.data() }));
-                students.sort((a, b) => {
-                    const ta = a.createdAt && typeof a.createdAt.toMillis === 'function' ? a.createdAt.toMillis() : 0;
-                    const tb = b.createdAt && typeof b.createdAt.toMillis === 'function' ? b.createdAt.toMillis() : 0;
-                    return tb - ta;
-                });
-
-                let html = '';
-                for (const st of students) {
-                    const selectedGrade = st.allowedGrade || st.gradeRequested || 'الصف السابع';
-                    html += `
-                        <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-700/30">
-                            <td class="p-3 font-semibold">${st.name || '-'}</td>
-                            <td class="p-3 text-xs font-mono">${st.email || '-'}</td>
-                            <td class="p-3">${st.gradeRequested || '-'}</td>
-                            <td class="p-3 text-xs text-slate-500">${formatStudentDate(st.createdAt)}</td>
-                            <td class="p-3">${getStudentStatusBadge(st)}</td>
-                            <td class="p-3">
-                                <select id="allowed-grade-${st.id}" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs">
-                                    <option value="الصف السابع" ${selectedGrade === 'الصف السابع' ? 'selected' : ''}>الصف السابع</option>
-                                    <option value="الصف الثامن" ${selectedGrade === 'الصف الثامن' ? 'selected' : ''}>الصف الثامن</option>
-                                    <option value="الصف التاسع" ${selectedGrade === 'الصف التاسع' ? 'selected' : ''}>الصف التاسع</option>
-                                </select>
-                            </td>
-                            <td class="p-3">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <button onclick="approveStudent('${st.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition">✅ قبول</button>
-                                    <button onclick="rejectStudent('${st.id}')" class="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition">❌ رفض</button>
-                                    <button onclick="deleteStudentRecord('${st.id}')" class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition">حذف</button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                }
-                tbody.innerHTML = html;
-            } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-rose-500">تعذر تحميل قائمة الطلاب: ${err.message}</td></tr>`;
-            }
-        }
-
-        async function approveStudent(studentId) {
-            const selectEl = document.getElementById(`allowed-grade-${studentId}`);
-            const allowedGrade = selectEl ? selectEl.value : 'الصف السابع';
-            try {
-                await db.collection('users').doc(studentId).update({
-                    approved: true,
-                    status: 'مقبول',
-                    allowedGrade: allowedGrade
-                });
-                await loadStudentsManagement();
-                alert(`تم قبول الطالب وتحديد الصف المسموح له: ${allowedGrade}`);
-            } catch (err) {
-                alert('حدث خطأ أثناء قبول الطالب: ' + err.message);
-            }
-        }
-
-        async function rejectStudent(studentId) {
-            try {
-                await db.collection('users').doc(studentId).update({
-                    approved: false,
-                    status: 'مرفوض'
-                });
-                await loadStudentsManagement();
-                alert('تم رفض حساب الطالب وتعيين approved = false.');
-            } catch (err) {
-                alert('حدث خطأ أثناء رفض الطالب: ' + err.message);
-            }
-        }
-
-        async function deleteStudentRecord(studentId) {
-            if (!confirm('هل أنت متأكد من حذف سجل هذا الطالب من قاعدة البيانات؟')) return;
-            try {
-                await db.collection('users').doc(studentId).delete();
-                await loadStudentsManagement();
-                alert('تم حذف سجل الطالب بنجاح.');
-            } catch (err) {
-                alert('حدث خطأ أثناء حذف الطالب: ' + err.message);
-            }
         }
 
         async function seedInitialGradesIfEmpty() {
@@ -563,27 +446,85 @@
             }
         }
 
-        function handleDirectPaste(e, targetId = 'new-lesson-content') {
-            let items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        function compressImageToDataUrl(fileOrBlob, maxWidth = 850, quality = 0.8) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        let w = img.width;
+                        let h = img.height;
+                        if (w > maxWidth) {
+                            h = Math.round((h * maxWidth) / w);
+                            w = maxWidth;
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, w, h);
+                        ctx.drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = function() {
+                        resolve(event.target.result);
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(fileOrBlob);
+            });
+        }
+
+        function insertAtCursor(textarea, textToInsert, cursorOffsetFromStart = null) {
+            const startPos = textarea.selectionStart || 0;
+            const endPos = textarea.selectionEnd || 0;
+            textarea.value = textarea.value.substring(0, startPos) + textToInsert + textarea.value.substring(endPos);
+            textarea.focus();
+            const newPos = cursorOffsetFromStart !== null ? startPos + cursorOffsetFromStart : startPos + textToInsert.length;
+            textarea.setSelectionRange(newPos, newPos);
+        }
+
+        function insertMathSnippet(snippet, cursorOffset) {
+            const target = activeExField || document.getElementById('ex-question');
+            insertAtCursor(target, snippet, cursorOffset);
+            previewExerciseContent();
+        }
+
+        async function handleExerciseImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const target = activeExField || document.getElementById('ex-question');
+            const base64Img = await compressImageToDataUrl(file, 850, 0.8);
+            const imgTag = `<img src="${base64Img}" alt="رسم توضيحي" style="max-width:100%; height:auto; display:block; margin:8px 0; border-radius:8px;" />`;
+            insertAtCursor(target, imgTag);
+            previewExerciseContent();
+            e.target.value = '';
+        }
+
+        async function handleDirectPaste(e, targetId = 'new-lesson-content') {
+            let clipboard = e.clipboardData || (e.originalEvent && e.originalEvent.clipboardData);
+            if (!clipboard) return;
+            let items = clipboard.items || [];
             for (let item of items) {
-                if (item.type.indexOf("image") === 0) {
+                if (item.type && item.type.indexOf("image") === 0) {
                     e.preventDefault();
                     let blob = item.getAsFile();
-                    let reader = new FileReader();
-                    reader.onload = function(event) {
-                        let base64Img = event.target.result;
-                        let imgTag = `\n<img src="${base64Img}" alt="Screenshot" style="max-width:100%; height:auto; display:inline-block; margin: 10px auto; border-radius: 8px;" />\n`;
-                        let textarea = document.getElementById(targetId);
-                        let startPos = textarea.selectionStart;
-                        let endPos = textarea.selectionEnd;
-                        textarea.value = textarea.value.substring(0, startPos) + imgTag + textarea.value.substring(endPos, textarea.value.length);
-                        if (targetId === 'new-lesson-content') previewMathContent();
-                        else previewExerciseContent();
-                        alert('تم لصق الصورة/الرسمة بنجاح!');
-                    };
-                    reader.readAsDataURL(blob);
+                    if (!blob) continue;
+                    let base64Img = await compressImageToDataUrl(blob, 850, 0.8);
+                    let imgTag = `<img src="${base64Img}" alt="صورة التمرين" style="max-width:100%; height:auto; display:block; margin:8px 0; border-radius:8px;" />`;
+                    let textarea = document.getElementById(targetId);
+                    insertAtCursor(textarea, imgTag);
+                    if (targetId === 'new-lesson-content') previewMathContent();
+                    else previewExerciseContent();
+                    return;
                 }
             }
+        }
+
+        function scheduleExercisePreview() {
+            clearTimeout(previewTimer);
+            previewTimer = setTimeout(previewExerciseContent, 250);
         }
 
         function openAddGradeModal() { document.getElementById('grade-modal').classList.remove('hidden'); }
@@ -681,7 +622,8 @@
             document.getElementById('ex-book-id').value = bookId;
             document.getElementById('ex-unit-id').value = unitId;
             document.getElementById('ex-lesson-id').value = lessonId;
-            document.getElementById('live-exercise-preview').innerHTML = 'اضغط "معاينة التمرين" لرؤية المعادلات والرسوم...';
+            activeExField = document.getElementById('ex-question');
+            document.getElementById('live-exercise-preview').innerHTML = 'اكتب السؤال أو الصق صورة لتظهر هنا تلقائياً...';
             document.getElementById('exercise-modal').classList.remove('hidden');
         }
         function closeExerciseModal() { document.getElementById('exercise-modal').classList.add('hidden'); }
@@ -697,7 +639,7 @@
 
             let html = `<div dir="rtl" style="text-align: right; direction: rtl;"><strong>السؤال:</strong> ${q}</div>`;
             if (opts.length > 0) {
-                html += `<ul class="list-disc pr-5 space-y-1">`;
+                html += `<ul class="list-disc pr-5 space-y-2 mt-2">`;
                 opts.forEach(o => {
                     html += `<li dir="rtl" style="text-align: right; direction: rtl;">${o}</li>`;
                 });
@@ -727,25 +669,29 @@
                 return;
             }
 
-            const lessonRef = db.collection('grades').doc(gId).collection('books').doc(bId).collection('units').doc(uId).collection('lessons').doc(lId);
-            const docSnap = await lessonRef.get();
-            const currentExercises = (docSnap.exists && Array.isArray(docSnap.data().exercises)) ? docSnap.data().exercises : [];
+            try {
+                const lessonRef = db.collection('grades').doc(gId).collection('books').doc(bId).collection('units').doc(uId).collection('lessons').doc(lId);
+                const docSnap = await lessonRef.get();
+                const currentExercises = (docSnap.exists && Array.isArray(docSnap.data().exercises)) ? docSnap.data().exercises : [];
 
-            currentExercises.push({
-                question,
-                options: [opt0, opt1, opt2, opt3].filter(o => o !== ''),
-                correct
-            });
+                currentExercises.push({
+                    question,
+                    options: [opt0, opt1, opt2, opt3].filter(o => o !== ''),
+                    correct
+                });
 
-            await lessonRef.update({ exercises: currentExercises });
-            closeExerciseModal();
-            document.getElementById('ex-question').value = '';
-            document.getElementById('ex-opt0').value = '';
-            document.getElementById('ex-opt1').value = '';
-            document.getElementById('ex-opt2').value = '';
-            document.getElementById('ex-opt3').value = '';
-            await renderAdminUnits();
-            alert('تمت إضافة التمرين ونشره بنجاح!');
+                await lessonRef.update({ exercises: currentExercises });
+                closeExerciseModal();
+                document.getElementById('ex-question').value = '';
+                document.getElementById('ex-opt0').value = '';
+                document.getElementById('ex-opt1').value = '';
+                document.getElementById('ex-opt2').value = '';
+                document.getElementById('ex-opt3').value = '';
+                await renderAdminUnits();
+                alert('تمت إضافة التمرين ونشره بنجاح!');
+            } catch (err) {
+                alert('حدث خطأ أثناء حفظ التمرين: ' + (err.code || err.message));
+            }
         }
 
         function previewMathContent() {

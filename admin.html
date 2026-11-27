@@ -121,6 +121,17 @@
                     <button onclick="openAddBookModal()" class="w-full bg-emerald-50 text-emerald-600 font-medium py-2 rounded-xl text-xs hover:bg-emerald-100 transition"><i class="fa-solid fa-plus ml-1"></i> إضافة كتاب جديد</button>
                     <button onclick="openAddUnitModal()" class="w-full bg-indigo-50 text-indigo-600 font-medium py-2 rounded-xl text-xs hover:bg-indigo-100 transition"><i class="fa-solid fa-plus ml-1"></i> إضافة وحدة جديدة</button>
                 </div>
+
+                <!-- طلبات تسجيل الطلاب: إضافة أو حذف -->
+                <div class="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-sm text-indigo-600">طلبات الطلاب</h4>
+                        <button onclick="loadStudentRequests()" class="text-xs text-slate-500 hover:text-indigo-600"><i class="fa-solid fa-rotate"></i></button>
+                    </div>
+                    <div id="student-requests-list" class="space-y-2 text-xs">
+                        <p class="text-slate-400">جاري تحميل الطلبات...</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Content Management Panel -->
@@ -313,7 +324,59 @@
             guardScreen.classList.add('hidden');
             panelWrapper.classList.remove('hidden');
             await loadGradesDropdown();
+            await loadStudentRequests();
         });
+
+        async function loadStudentRequests() {
+            const box = document.getElementById('student-requests-list');
+            if (!box) return;
+            try {
+                const snap = await db.collection('student_requests').orderBy('createdAt', 'desc').get();
+                if (snap.empty) {
+                    box.innerHTML = `<p class="text-slate-400">لا توجد طلبات طلاب حالياً.</p>`;
+                    return;
+                }
+                let html = '';
+                snap.forEach(doc => {
+                    const req = doc.data();
+                    const statusLabel = req.status === 'approved' ? 'مضاف' : 'قيد الانتظار';
+                    html += `
+                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-600 space-y-1.5">
+                            <div class="font-bold">${req.name || 'طالب'}</div>
+                            <div class="text-slate-500">${req.grade || ''} - ${req.contact || ''}</div>
+                            <div class="text-[11px] text-indigo-600 font-semibold">${statusLabel}</div>
+                            <div class="flex gap-2 pt-1">
+                                <button onclick="addStudentRequest('${doc.id}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-1 rounded-lg text-[11px] font-medium">إضافة</button>
+                                <button onclick="deleteStudentRequest('${doc.id}')" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white py-1 rounded-lg text-[11px] font-medium">حذف</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                box.innerHTML = html;
+            } catch (err) {
+                box.innerHTML = `<p class="text-rose-500">تعذر تحميل الطلبات.</p>`;
+            }
+        }
+
+        async function addStudentRequest(id) {
+            try {
+                await db.collection('student_requests').doc(id).update({ status: 'approved' });
+                await loadStudentRequests();
+                alert('تمت إضافة الطالب بنجاح.');
+            } catch (err) {
+                alert('تعذر إضافة الطالب: ' + err.message);
+            }
+        }
+
+        async function deleteStudentRequest(id) {
+            try {
+                await db.collection('student_requests').doc(id).delete();
+                await loadStudentRequests();
+                alert('تم حذف الطلب بنجاح.');
+            } catch (err) {
+                alert('تعذر حذف الطلب: ' + err.message);
+            }
+        }
 
         async function handleGuardLogin(e) {
             e.preventDefault();

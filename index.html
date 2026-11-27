@@ -34,13 +34,6 @@
             direction: rtl;
             text-align: right;
         }
-        .exercise-block img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 8px 0;
-            border-radius: 8px;
-        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300" dir="rtl">
@@ -68,9 +61,6 @@
             </nav>
 
             <div class="flex items-center gap-3">
-                <button onclick="openStudentRequestModal()" class="text-xs bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-2 rounded-lg font-medium transition">
-                    <i class="fa-solid fa-user-plus ml-1"></i> طلب تسجيل
-                </button>
                 <button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300" title="تبديل الوضع الليلي/النهاري">
                     <i id="theme-icon" class="fa-solid fa-moon"></i>
                 </button>
@@ -164,22 +154,6 @@
 
     </main>
 
-    <!-- Student Request Modal -->
-    <div id="student-request-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" dir="rtl">
-        <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-100 dark:border-slate-700 space-y-4">
-            <div class="flex justify-between items-center border-b pb-3 border-slate-100 dark:border-slate-700">
-                <h3 class="text-lg font-bold text-indigo-600">طلب تسجيل طالب</h3>
-                <button onclick="closeStudentRequestModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            <form onsubmit="submitStudentRequest(event)" class="space-y-3">
-                <input type="text" id="req-student-name" placeholder="اسم الطالب" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm">
-                <input type="text" id="req-student-grade" placeholder="الصف (مثال: الصف التاسع)" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm">
-                <input type="text" id="req-student-contact" placeholder="رقم الهاتف أو البريد الإلكتروني" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm">
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-medium transition">إرسال الطلب</button>
-            </form>
-        </div>
-    </div>
-
     <!-- Admin Login Modal -->
     <div id="admin-login-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" dir="rtl">
         <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-100 dark:border-slate-700 space-y-5">
@@ -247,33 +221,6 @@
                 `;
             }
         });
-
-        function openStudentRequestModal() {
-            document.getElementById('student-request-modal').classList.remove('hidden');
-        }
-        function closeStudentRequestModal() {
-            document.getElementById('student-request-modal').classList.add('hidden');
-        }
-        async function submitStudentRequest(e) {
-            e.preventDefault();
-            const name = document.getElementById('req-student-name').value.trim();
-            const grade = document.getElementById('req-student-grade').value.trim();
-            const contact = document.getElementById('req-student-contact').value.trim();
-            try {
-                await db.collection('student_requests').add({
-                    name,
-                    grade,
-                    contact,
-                    status: 'pending',
-                    createdAt: Date.now()
-                });
-                closeStudentRequestModal();
-                e.target.reset();
-                alert('تم إرسال طلب التسجيل بنجاح.');
-            } catch (err) {
-                alert('تعذر إرسال الطلب: ' + err.message);
-            }
-        }
 
         function openAdminLoginModal() {
             document.getElementById('admin-login-modal').classList.remove('hidden');
@@ -471,7 +418,7 @@
                 `;
 
                 if (Array.isArray(lesson.exercises) && lesson.exercises.length > 0) {
-                    html += `<div class="pt-6 border-t border-slate-200 dark:border-slate-700 space-y-6 exercise-block">
+                    html += `<div class="pt-6 border-t border-slate-200 dark:border-slate-700 space-y-6">
                         <h3 class="text-xl font-bold text-emerald-600"><i class="fa-solid fa-pen-to-square ml-2"></i> تمارين تفاعلية للدرس</h3>`;
 
                     lesson.exercises.forEach((ex, eIdx) => {
@@ -481,7 +428,7 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                         `;
                         (ex.options || []).forEach((opt, oIdx) => {
-                            html += `<button onclick="checkAnswer(this, ${oIdx}, ${ex.correct})" class="p-3 text-right bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 text-sm hover:border-indigo-500 transition flex flex-col items-start">${opt}</button>`;
+                            html += `<button onclick="checkAnswer(this, ${oIdx}, ${ex.correct})" class="p-3 text-right bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 text-sm hover:border-indigo-500 transition">${opt}</button>`;
                         });
                         html += `</div><div class="ex-feedback text-sm font-semibold mt-2"></div></div>`;
                     });

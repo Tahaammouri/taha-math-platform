@@ -122,7 +122,7 @@
                     <button onclick="openAddUnitModal()" class="w-full bg-indigo-50 text-indigo-600 font-medium py-2 rounded-xl text-xs hover:bg-indigo-100 transition"><i class="fa-solid fa-plus ml-1"></i> إضافة وحدة جديدة</button>
                 </div>
 
-                <!-- طلبات تسجيل الطلاب: إضافة أو حذف -->
+                <!-- طلبات تسجيل الطلاب: تحديد الصف والإضافة أو الحذف -->
                 <div class="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-3">
                     <div class="flex items-center justify-between">
                         <h4 class="font-bold text-sm text-indigo-600">طلبات الطلاب</h4>
@@ -327,30 +327,24 @@
             await loadStudentRequests();
         });
 
+        function escapeHtmlAttr(str) {
+            return String(str || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
         async function loadStudentRequests() {
             const box = document.getElementById('student-requests-list');
             if (!box) return;
-            const collectionsToCheck = ['student_requests', 'students', 'requests', 'users'];
+            box.innerHTML = `<p class="text-slate-400">جاري تحميل الطلبات...</p>`;
+
             try {
-                let foundDocs = [];
-                let activeCol = 'student_requests';
+                const snap = await db.collection('student_requests').get();
+                const foundDocs = [];
 
-                for (const colName of collectionsToCheck) {
-                    const snap = await db.collection(colName).get();
-                    if (!snap.empty) {
-                        activeCol = colName;
-                        snap.forEach(doc => {
-                            const data = doc.data();
-                            if (colName === 'users' && data.email && data.email.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
-                                return;
-                            }
-                            foundDocs.push({ id: doc.id, col: colName, ...data });
-                        });
-                        if (foundDocs.length > 0) break;
-                    }
-                }
+                snap.forEach(doc => {
+                    foundDocs.push({ id: doc.id, col: 'student_requests', ...doc.data() });
+                });
 
-                window._activeStudentCol = activeCol;
+                window._activeStudentCol = 'student_requests';
 
                 if (foundDocs.length === 0) {
                     box.innerHTML = `<p class="text-slate-400">لا توجد طلبات طلاب حالياً.</p>`;
@@ -359,19 +353,35 @@
 
                 foundDocs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
+                const gradeOptions = ['الصف السابع', 'الصف الثامن', 'الصف التاسع'];
+
                 let html = '';
                 foundDocs.forEach(req => {
                     const studentName = req.name || req.studentName || req.fullName || req.email || 'طالب';
-                    const studentGrade = req.grade || req.studentGrade || req.className || '';
+                    const currentGrade = req.allowedGrade || req.grade || req.studentGrade || req.className || 'الصف السابع';
                     const studentContact = req.contact || req.phone || req.email || '';
                     const isAdded = req.status === 'approved' || req.approved === true;
-                    const statusLabel = isAdded ? 'مضاف' : 'قيد الانتظار';
+                    const statusLabel = isAdded ? `مضاف (${currentGrade})` : 'قيد الانتظار';
+
+                    const allGrades = gradeOptions.includes(currentGrade)
+                        ? gradeOptions
+                        : [currentGrade, ...gradeOptions];
+
+                    const optionsHtml = allGrades.map(g =>
+                        `<option value="${escapeHtmlAttr(g)}" ${g === currentGrade ? 'selected' : ''}>${g}</option>`
+                    ).join('');
 
                     html += `
                         <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-600 space-y-1.5">
                             <div class="font-bold">${studentName}</div>
-                            <div class="text-slate-500">${studentGrade}${studentGrade && studentContact ? ' - ' : ''}${studentContact}</div>
+                            ${studentContact ? `<div class="text-slate-500">${studentContact}</div>` : ''}
                             <div class="text-[11px] text-indigo-600 font-semibold">${statusLabel}</div>
+                            <div>
+                                <label class="block text-[11px] text-slate-500 mb-1">الصف المسموح به:</label>
+                                <select id="grade-select-${req.id}" class="w-full p-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-[11px]">
+                                    ${optionsHtml}
+                                </select>
+                            </div>
                             <div class="flex gap-2 pt-1">
                                 <button onclick="addStudentRequest('${req.id}', '${req.col}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-1 rounded-lg text-[11px] font-medium">إضافة</button>
                                 <button onclick="deleteStudentRequest('${req.id}', '${req.col}')" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white py-1 rounded-lg text-[11px] font-medium">حذف</button>
@@ -387,10 +397,23 @@
 
         async function addStudentRequest(id, colName = null) {
             const targetCol = colName || window._activeStudentCol || 'student_requests';
+            const selectEl = document.getElementById(`grade-select-${id}`);
+            const selectedGrade = selectEl ? selectEl.value : '';
+
+            if (!selectedGrade) {
+                alert('يرجى اختيار الصف المسموح للطالب.');
+                return;
+            }
+
             try {
-                await db.collection(targetCol).doc(id).set({ status: 'approved', approved: true }, { merge: true });
+                await db.collection(targetCol).doc(id).set({
+                    grade: selectedGrade,
+                    allowedGrade: selectedGrade,
+                    status: 'approved',
+                    approved: true
+                }, { merge: true });
                 await loadStudentRequests();
-                alert('تمت إضافة الطالب بنجاح.');
+                alert(`تمت إضافة الطالب وتحديد الصف (${selectedGrade}) بنجاح.`);
             } catch (err) {
                 alert('تعذر إضافة الطالب: ' + err.message);
             }

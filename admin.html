@@ -330,37 +330,65 @@
         async function loadStudentRequests() {
             const box = document.getElementById('student-requests-list');
             if (!box) return;
+            const collectionsToCheck = ['student_requests', 'students', 'requests', 'users'];
             try {
-                const snap = await db.collection('student_requests').orderBy('createdAt', 'desc').get();
-                if (snap.empty) {
+                let foundDocs = [];
+                let activeCol = 'student_requests';
+
+                for (const colName of collectionsToCheck) {
+                    const snap = await db.collection(colName).get();
+                    if (!snap.empty) {
+                        activeCol = colName;
+                        snap.forEach(doc => {
+                            const data = doc.data();
+                            if (colName === 'users' && data.email && data.email.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+                                return;
+                            }
+                            foundDocs.push({ id: doc.id, col: colName, ...data });
+                        });
+                        if (foundDocs.length > 0) break;
+                    }
+                }
+
+                window._activeStudentCol = activeCol;
+
+                if (foundDocs.length === 0) {
                     box.innerHTML = `<p class="text-slate-400">لا توجد طلبات طلاب حالياً.</p>`;
                     return;
                 }
+
+                foundDocs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
                 let html = '';
-                snap.forEach(doc => {
-                    const req = doc.data();
-                    const statusLabel = req.status === 'approved' ? 'مضاف' : 'قيد الانتظار';
+                foundDocs.forEach(req => {
+                    const studentName = req.name || req.studentName || req.fullName || req.email || 'طالب';
+                    const studentGrade = req.grade || req.studentGrade || req.className || '';
+                    const studentContact = req.contact || req.phone || req.email || '';
+                    const isAdded = req.status === 'approved' || req.approved === true;
+                    const statusLabel = isAdded ? 'مضاف' : 'قيد الانتظار';
+
                     html += `
                         <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-600 space-y-1.5">
-                            <div class="font-bold">${req.name || 'طالب'}</div>
-                            <div class="text-slate-500">${req.grade || ''} - ${req.contact || ''}</div>
+                            <div class="font-bold">${studentName}</div>
+                            <div class="text-slate-500">${studentGrade}${studentGrade && studentContact ? ' - ' : ''}${studentContact}</div>
                             <div class="text-[11px] text-indigo-600 font-semibold">${statusLabel}</div>
                             <div class="flex gap-2 pt-1">
-                                <button onclick="addStudentRequest('${doc.id}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-1 rounded-lg text-[11px] font-medium">إضافة</button>
-                                <button onclick="deleteStudentRequest('${doc.id}')" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white py-1 rounded-lg text-[11px] font-medium">حذف</button>
+                                <button onclick="addStudentRequest('${req.id}', '${req.col}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-1 rounded-lg text-[11px] font-medium">إضافة</button>
+                                <button onclick="deleteStudentRequest('${req.id}', '${req.col}')" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white py-1 rounded-lg text-[11px] font-medium">حذف</button>
                             </div>
                         </div>
                     `;
                 });
                 box.innerHTML = html;
             } catch (err) {
-                box.innerHTML = `<p class="text-rose-500">تعذر تحميل الطلبات.</p>`;
+                box.innerHTML = `<p class="text-rose-500">تعذر تحميل الطلبات (${err.code || err.message}).</p>`;
             }
         }
 
-        async function addStudentRequest(id) {
+        async function addStudentRequest(id, colName = null) {
+            const targetCol = colName || window._activeStudentCol || 'student_requests';
             try {
-                await db.collection('student_requests').doc(id).update({ status: 'approved' });
+                await db.collection(targetCol).doc(id).set({ status: 'approved', approved: true }, { merge: true });
                 await loadStudentRequests();
                 alert('تمت إضافة الطالب بنجاح.');
             } catch (err) {
@@ -368,9 +396,10 @@
             }
         }
 
-        async function deleteStudentRequest(id) {
+        async function deleteStudentRequest(id, colName = null) {
+            const targetCol = colName || window._activeStudentCol || 'student_requests';
             try {
-                await db.collection('student_requests').doc(id).delete();
+                await db.collection(targetCol).doc(id).delete();
                 await loadStudentRequests();
                 alert('تم حذف الطلب بنجاح.');
             } catch (err) {
